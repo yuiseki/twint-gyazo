@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import platform
 
 import time
 import datetime
@@ -42,10 +43,17 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     title = soup.title.string
 
     # Device IDを取得する
-    # TODO いまはWindows専用
-    # TODO WindowsかmacOSか判別する必要ある
-    appdata_path = os.getenv('APPDATA')
-    with open(appdata_path+'\Gyazo\id.txt', 'r') as device_id_file:
+    # TODO detect Linux
+    appdata_path = None
+    appdata_filename = None
+    if 'Darwin' in platform.system():
+        appdata_path = os.path.expanduser('~/Library/Gyazo/')
+        appdata_filename = 'id'
+    elif 'Windows' in platform.system() or 'CYGWIN' in platform.system():
+        appdata_path = os.getenv('APPDATA') + '\\Gyazo\\'
+        appdata_filename = 'id.txt'
+
+    with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
         device_id = device_id_file.read()
 
     # Gyazoにアップロードするための formdata をつくる
