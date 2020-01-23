@@ -43,7 +43,6 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     title = soup.title.string
 
     # Device IDを取得する
-    # TODO detect Linux
     appdata_path = None
     appdata_filename = None
     if 'Darwin' in platform.system():
