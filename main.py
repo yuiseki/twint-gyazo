@@ -52,6 +52,9 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     elif 'Windows' in platform.system() or 'CYGWIN' in platform.system():
         appdata_path = os.getenv('APPDATA') + '\\Gyazo\\'
         appdata_filename = 'id.txt'
+    elif 'Linux' in platform.system():
+        appdata_path = os.path.expanduser('~/')
+        appdata_filename = '.gyazo.id'
 
     with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
         device_id = device_id_file.read()
