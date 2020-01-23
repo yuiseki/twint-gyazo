@@ -1,5 +1,9 @@
 # twint-gyazo
 
+## What is this
+
+- Twitterの指定したユーザーの画像を全部Gyazoに保存します
+- Save all images to Gyazo specified user of twitter
 
 ## Install
 
