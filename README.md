@@ -8,7 +8,7 @@
 ## Install
 
 ```
-make bundle
+pip install -r requirements.txt
 ```
 
 ## Usage
