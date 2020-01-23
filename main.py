@@ -17,7 +17,6 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     # 画像を取得する
     parsed_url = urlparse(image_url)
     file_name = os.path.basename(parsed_url.path)
-    time.sleep(1.0)
     response = requests.get(image_url)
     imagedata = response.content
 
