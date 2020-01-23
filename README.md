@@ -8,7 +8,7 @@
 ## Install
 
 ```
-make
+make bundle
 ```
 
 ## Usage
