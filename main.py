@@ -14,7 +14,6 @@ import requests
 from bs4 import BeautifulSoup
 
 def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
-
     # 画像を取得する
     parsed_url = urlparse(image_url)
     file_name = os.path.basename(parsed_url.path)
@@ -44,12 +43,14 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     title = soup.title.string
 
     # Device IDを取得する
-    # TODO windowsかmacか判別する
+    # TODO いまはWindows専用
+    # TODO WindowsかmacOSか判別する必要ある
     appdata_path = os.getenv('APPDATA')
     with open(appdata_path+'\Gyazo\id.txt', 'r') as device_id_file:
         device_id = device_id_file.read()
 
     # Gyazoにアップロードするための formdata をつくる
+    # metadata
     desc = ""
     tweet_hash = "#twitter_"+screen_name
     desc = desc+tweet_hash
@@ -62,12 +63,14 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
         'url': tweet_url,
         'desc': desc
     }
+    # formdata
     formdata = {
         'id': device_id,
         'scale': "1.0",
         'created_at': timestamp,
         'metadata': json.dumps(metadata)
     }
+    # filedata
     files = {'imagedata': (file_name, imagedata, content_type)}
     gyazo_res = requests.post("https://upload.gyazo.com/upload.cgi", data=formdata, files=files)
     print(gyazo_res)
