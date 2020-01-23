@@ -14,3 +14,6 @@ pip install beautifulsoup4
 ```
 python main.py gyazo yuiseki
 ```
+
+## Result
+
