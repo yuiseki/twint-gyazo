@@ -43,7 +43,7 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
     with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
         device_id = device_id_file.read()
 
-    # Gyazoにアップロードするための multipart/formdata をつくる
+    # Gyazoにアップロードするための multipart/form-data をつくる
     # filedata
     files = {'imagedata': (file_name, imagedata, content_type)}
 
