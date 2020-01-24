@@ -113,7 +113,7 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
         retweet_hash = "#twitter_rt_"+retweeted_by
         desc = desc+" "+retweet_hash
 
-    gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
+    gyazoUpload(file_name, imagedata, content_type, title, tweet_url, desc, timestamp)
 
 
 def gyazoTweet(screen_name, tweet):
