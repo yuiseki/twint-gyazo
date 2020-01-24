@@ -14,7 +14,62 @@ import twint
 import requests
 from bs4 import BeautifulSoup
 
+def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp):
+    """
+    画像のバイナリと各種メタデータを指定してGyazoへのアップロードを実行するメソッド
+     
+    Args:
+        file_name (str): 画像のファイル名
+        imagedata (binary): 画像のバイナリ
+        content_type (str): 画像の mime content type
+        title (str): 画像を取得したウェブサイトのタイトル
+        url (str): 画像を取得したウェブサイトのURL
+        desc (str): Gyazo の Description 欄に記入されるメモ
+        timestamp (int): 画像の最終変更日時
+    """
+    # Device IDを取得する
+    # TODO detect Linux
+    appdata_path = None
+    appdata_filename = None
+    if 'Darwin' in platform.system():
+        appdata_path = os.path.expanduser('~/Library/Gyazo/')
+        appdata_filename = 'id'
+    elif 'Windows' in platform.system() or 'CYGWIN' in platform.system():
+        appdata_path = os.getenv('APPDATA') + '\\Gyazo\\'
+        appdata_filename = 'id.txt'
+    with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
+        device_id = device_id_file.read()
+    # Gyazoにアップロードするための multipart/formdata をつくる
+    # filedata
+    files = {'imagedata': (file_name, imagedata, content_type)}
+    # metadata
+    metadata = {
+        'app': "twint-gyazo",
+        'title': title,
+        'url': url,
+        'desc': desc
+    }
+    # formdata
+    formdata = {
+        'id': device_id,
+        'scale': "1.0",
+        'created_at': timestamp,
+        'metadata': json.dumps(metadata)
+    }
+    gyazo_res = requests.post("https://upload.gyazo.com/upload.cgi", data=formdata, files=files)
+    print(gyazo_res)
+    print(gyazo_res.text)
+
 def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
+    """
+    指定されたTwitterの画像をGyazoにアップロードするメソッド
+     
+    Args:
+        image_url (str): Gyazo にアップロードしたいツイート内の画像
+        screen_name (str): 画像をツイートした Twitter ユーザーの screen name
+        tweet_url (str): ツイートの URL
+        retweeted_by (str): 画像を RT した Twitter ユーザーの screen name
+    """
     # 画像を取得する
     parsed_url = urlparse(image_url)
     file_name = os.path.basename(parsed_url.path)
@@ -42,46 +97,17 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     soup = BeautifulSoup(html, "html.parser")
     title = soup.title.string
 
-    # Device IDを取得する
-    # TODO detect Linux
-    appdata_path = None
-    appdata_filename = None
-    if 'Darwin' in platform.system():
-        appdata_path = os.path.expanduser('~/Library/Gyazo/')
-        appdata_filename = 'id'
-    elif 'Windows' in platform.system() or 'CYGWIN' in platform.system():
-        appdata_path = os.getenv('APPDATA') + '\\Gyazo\\'
-        appdata_filename = 'id.txt'
-
-    with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
-        device_id = device_id_file.read()
-
-    # Gyazoにアップロードするための formdata をつくる
-    # metadata
+    # Gyazoで管理するためにハッシュタグをきめる
     desc = ""
     tweet_hash = "#twitter_"+screen_name
     desc = desc+tweet_hash
     if retweeted_by is not None:
         retweet_hash = "#twitter_rt_"+retweeted_by
         desc = desc+" "+retweet_hash
-    metadata = {
-        'app': "twint-gyazo",
-        'title': title,
-        'url': tweet_url,
-        'desc': desc
-    }
-    # formdata
-    formdata = {
-        'id': device_id,
-        'scale': "1.0",
-        'created_at': timestamp,
-        'metadata': json.dumps(metadata)
-    }
-    # filedata
-    files = {'imagedata': (file_name, imagedata, content_type)}
-    gyazo_res = requests.post("https://upload.gyazo.com/upload.cgi", data=formdata, files=files)
-    print(gyazo_res)
-    print(gyazo_res.text)
+
+    gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
+
+
 
 
 def gyazoTweet(screen_name, tweet):
