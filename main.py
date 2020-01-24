@@ -29,7 +29,6 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
         timestamp (int): 画像の最終変更日時
     """
     # Device IDを取得する
-    # TODO detect Linux
     appdata_path = None
     appdata_filename = None
     if 'Darwin' in platform.system():
