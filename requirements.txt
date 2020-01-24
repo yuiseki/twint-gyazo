@@ -1,0 +1,3 @@
+twint
+requests
+beautifulsoup4

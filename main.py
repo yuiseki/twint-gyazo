@@ -14,6 +14,7 @@ import twint
 import requests
 from bs4 import BeautifulSoup
 
+
 def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp):
     """
     画像のバイナリと各種メタデータを指定してGyazoへのアップロードを実行するメソッド
@@ -37,11 +38,16 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
     elif 'Windows' in platform.system() or 'CYGWIN' in platform.system():
         appdata_path = os.getenv('APPDATA') + '\\Gyazo\\'
         appdata_filename = 'id.txt'
+    elif 'Linux' in platform.system():
+        appdata_path = os.path.expanduser('~/')
+        appdata_filename = '.gyazo.id'
     with open(('%s%s' % (appdata_path, appdata_filename)), 'r') as device_id_file:
         device_id = device_id_file.read()
+
     # Gyazoにアップロードするための multipart/formdata をつくる
     # filedata
     files = {'imagedata': (file_name, imagedata, content_type)}
+
     # metadata
     metadata = {
         'app': "twint-gyazo",
@@ -49,6 +55,7 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
         'url': url,
         'desc': desc
     }
+
     # formdata
     formdata = {
         'id': device_id,
@@ -56,9 +63,11 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
         'created_at': timestamp,
         'metadata': json.dumps(metadata)
     }
+
     gyazo_res = requests.post("https://upload.gyazo.com/upload.cgi", data=formdata, files=files)
     print(gyazo_res)
     print(gyazo_res.text)
+
 
 def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     """
@@ -106,8 +115,6 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
         desc = desc+" "+retweet_hash
 
     gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
-
-
 
 
 def gyazoTweet(screen_name, tweet):
@@ -179,7 +186,6 @@ def gyazoTweetedPhotos(screen_name):
     tweets = twintGetUserTweets(screen_name, include_retweets=True)
     for tweet in tweets:
         gyazoTweet(screen_name, tweet)
-
 
 
 def printUsage():

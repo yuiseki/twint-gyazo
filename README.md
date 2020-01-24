@@ -8,9 +8,7 @@
 ## Install
 
 ```
-pip install twint
-pip install requests
-pip install beautifulsoup4
+pip install -r requirements.txt
 ```
 
 ## Usage
