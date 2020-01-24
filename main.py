@@ -112,8 +112,8 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     if retweeted_by is not None:
         retweet_hash = "#twitter_rt_"+retweeted_by
         desc = desc+" "+retweet_hash
-
     gyazoUpload(file_name, imagedata, content_type, title, tweet_url, desc, timestamp)
+
 
 
 def gyazoTweet(screen_name, tweet):
@@ -167,6 +167,8 @@ def twintGetUserTweets(screen_name, limit=4000, include_retweets=True):
     c.Username = screen_name
     # retweetを含めるか
     c.Retweets = include_retweets
+    # 画像つきツイートのみ取得する
+    c.Images = True
     # 何件取得するか
     c.Limit = limit
     # Profileでタイムライン取得を実行する
