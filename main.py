@@ -185,8 +185,13 @@ def gyazoTweetedPhotos(screen_name):
         screen_name (str): 画像を取得したいユーザーのscreen_name
     '''
     tweets = twintGetUserTweets(screen_name, include_retweets=True)
-    for tweet in tweets:
-        gyazoTweet(screen_name, tweet)
+    # twintが狂ってて取得ツイートが空になることが頻繁にあるので、その場合はリトライする
+    if len(tweets) is 0:
+        time.sleep(5)
+        gyazoTweetedPhotos(screen_name)
+    else:
+        for tweet in tweets:
+            gyazoTweet(screen_name, tweet)
 
 
 def printUsage():
