@@ -8,13 +8,13 @@
 ## Install
 
 ```
-pip install -r requirements.txt
+poetry install
 ```
 
 ## Usage
 
 ```
-python main.py gyazo yuiseki
+poetry run python main.py gyazo yuiseki_
 ```
 
 ## Result

@@ -1,3 +1,0 @@
-twint
-requests
-beautifulsoup4

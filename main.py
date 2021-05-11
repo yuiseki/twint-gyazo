@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import sys
 import json
@@ -18,7 +19,7 @@ from bs4 import BeautifulSoup
 def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp):
     """
     画像のバイナリと各種メタデータを指定してGyazoへのアップロードを実行するメソッド
-     
+    
     Args:
         file_name (str): 画像のファイル名
         imagedata (binary): 画像のバイナリ
@@ -68,13 +69,15 @@ def gyazoUpload(file_name, imagedata, content_type, title, url, desc, timestamp)
     print(gyazo_res.text)
 
 
-def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
+def gyazoImage(image_url, screen_name, name, tweet, tweet_url, retweeted_by=None, index=0):
     """
     指定されたTwitterの画像をGyazoにアップロードするメソッド
-     
+    
     Args:
         image_url (str): Gyazo にアップロードしたいツイート内の画像
         screen_name (str): 画像をツイートした Twitter ユーザーの screen name
+        name (str): 画像をツイートした Twitter ユーザーの名前
+        tweet (str): ツイート本文
         tweet_url (str): ツイートの URL
         retweeted_by (str): 画像を RT した Twitter ユーザーの screen name
     """
@@ -99,19 +102,29 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
     print(last_modified)
     # unixtimeに変換する
     timestamp = int(parse(last_modified).timestamp())
+    # 同じunix timestampだと困るのでindexごとに増やす
+    timestamp += index
 
     # Twitterのタイトルを取得する
-    html = requests.get(tweet_url).text
+    """
+    tweet_mobile_url = tweet_url.replace('twitter.com', 'mobile.twitter.com')
+    print(tweet_mobile_url)
+    html = requests.get(tweet_mobile_url).text
     soup = BeautifulSoup(html, "html.parser")
-    title = soup.title.string
+    title = soup.find('title')
+    print(title.string)
+    """
+    title = f"{name}さんのツイート: \"{tweet}\" / Twitter"
+    print(title)
 
     # Gyazoで管理するためにハッシュタグをきめる
     desc = ""
     tweet_hash = "#twitter_"+screen_name
     desc = desc+tweet_hash
-    if retweeted_by is not None:
+    if retweeted_by != None:
         retweet_hash = "#twitter_rt_"+retweeted_by
         desc = desc+" "+retweet_hash
+    # TODO: likeへの対応
     gyazoUpload(file_name, imagedata, content_type, title, tweet_url, desc, timestamp)
 
 
@@ -119,38 +132,38 @@ def gyazoImage(image_url, screen_name, tweet_url, retweeted_by=None):
 def gyazoTweet(screen_name, tweet):
     """
     指定されたTweetの画像をGyazoに保存するメソッド
-     
+    
     Args:
         tweet (tweet obj): twint.output.tweets_list で得られるTweet
     """
     # dictだったりそうじゃなかったりする（twint罰）
     if isinstance(tweet, dict):
+        # 自分自身
         if screen_name == tweet['username']:
-            for photo in tweet['photos']:
-                gyazoImage(photo, screen_name, tweet['link'])
+            for i, photo in enumerate(tweet['photos']):
+                gyazoImage(photo, screen_name, tweet['name'], tweet['tweet'], tweet['link'], index=i)
+        # RT
         else:
-            for photo in tweet['photos']:
-                gyazoImage(photo, tweet['username'], tweet['link'], retweeted_by=screen_name)
+            for i, photo in enumerate(tweet['photos']):
+                gyazoImage(photo, tweet['username'], tweet['name'], tweet['tweet'], tweet['link'], retweeted_by=screen_name, index=i)
     else:
         if screen_name == tweet.username:
-            for photo in tweet.photos:
-                gyazoImage(photo, screen_name, tweet.link)
+            for i, photo in enumerate(tweet.photos):
+                gyazoImage(photo, screen_name, tweet.name, tweet.tweet, tweet.link, index=i)
         else:
-            for photo in tweet.photos:
-                gyazoImage(photo, tweet.username, tweet.link, retweeted_by=screen_name)
-
-
+            for i, photo in enumerate(tweet.photos):
+                gyazoImage(photo, tweet.username, tweet.name, tweet.tweet, tweet.link, retweeted_by=screen_name, index=i)
 
 
 def twintGetUserTweets(screen_name, limit=4000, include_retweets=True):
     '''
     特定のユーザーのTwitterタイムラインを取得するメソッド
-     
+    
     Args:
         screen_name (str): 収集したいユーザーの screen_name
         limit (int): 取得件数（Twitterの仕様上4000件くらいが限界）
         include_retweets (bool): リツイートを含めるか否か
-     
+    
     Returns:
         tweets (array)
     '''
@@ -158,35 +171,36 @@ def twintGetUserTweets(screen_name, limit=4000, include_retweets=True):
     twint.output.users_list = []
     twint.output.tweets_list = []
     c = twint.Config()
-    c.Store_object = True
-    c.Store_json = True
-    # 標準出力へログ出力するか否か
-    c.Hide_output = False
-    # 標準出力へのログ出力のフォーマット
-    c.Format = 'twint account: - {username} - {id}'
     c.Username = screen_name
+    c.Store_object = True
+    #c.Store_json = True
+    # 標準出力へログ出力するか否か
+    c.Hide_output = True
+    # 標準出力へのログ出力のフォーマット
+    #c.Format = 'twint account: - {username} - {id}'
     # retweetを含めるか
     c.Retweets = include_retweets
     # 画像つきツイートのみ取得する
     c.Images = True
     # 何件取得するか
     c.Limit = limit
-    # Profileでタイムライン取得を実行する
-    twint.run.Profile(c)
+    # Searchでタイムライン取得を実行する
+    twint.run.Search(c)
     tweets = twint.output.tweets_list
+    print("twintGetUserTweets: "+str(len(tweets)))
     return tweets
 
 
 def gyazoTweetedPhotos(screen_name):
     '''
     特定のTwitterユーザーがツイートした全画像をGyazoに保存するメソッド
-     
+    
     Args:
         screen_name (str): 画像を取得したいユーザーのscreen_name
     '''
     tweets = twintGetUserTweets(screen_name, include_retweets=True)
     # twintが狂ってて取得ツイートが空になることが頻繁にあるので、その場合はリトライする
-    if len(tweets) is 0:
+    if len(tweets) == 0:
         time.sleep(5)
         gyazoTweetedPhotos(screen_name)
     else:
@@ -211,6 +225,6 @@ if __name__ == "__main__":
         targetMethod = sys.argv[1]
     if (len(sys.argv) >= 3):
         optionalArg = sys.argv[2]
-    if targetMethod is not None:
+    if targetMethod != None:
         if targetMethod == "gyazo":
             gyazoTweetedPhotos(optionalArg)
