@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.8"
 requests = "^2.25.1"
 beautifulsoup4 = "^4.9.3"
-twint = {git = "https://github.com/twintproject/twint.git", rev = "master"}
+twint = {git = "https://github.com/twintproject/twint.git", rev = "e7c8a0c764f6879188e5c21e25fb6f1f856a7221"}
 
 [tool.poetry.dev-dependencies]
 
