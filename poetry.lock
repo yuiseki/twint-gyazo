@@ -781,7 +781,7 @@ develop = false
 [package.dependencies]
 aiodns = "*"
 aiohttp = "*"
-aiohttp-socks = "*"
+aiohttp_socks = "*"
 beautifulsoup4 = "*"
 cchardet = "*"
 dataclasses = "*"
@@ -796,7 +796,7 @@ schedule = "*"
 [package.source]
 type = "git"
 url = "https://github.com/twintproject/twint.git"
-reference = "master"
+reference = "e7c8a0c764f6879188e5c21e25fb6f1f856a7221"
 resolved_reference = "e7c8a0c764f6879188e5c21e25fb6f1f856a7221"
 
 [[package]]
@@ -882,4 +882,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "da876f436e873912c6504fa8bd2f9c71fe09d0a053ffb0076f0c12806bf795e2"
+content-hash = "7cfab549aeda39e9d5a449d6c9b66887263dbd3b42b7ca84bd4e1b86d31026a3"
